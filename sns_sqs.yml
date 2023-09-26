@@ -1,0 +1,51 @@
+version: '3.0'
+
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    environment:
+      - SERVICES=sqs,sns
+      - AWS_ACCESS_KEY_ID=AKIAEXAMPLE123
+      - AWS_SECRET_ACCESS_KEY=AWSSECRETACCESSEY123
+      - AWS_DEFAULT_REGION=eu-central-1
+      - EDGE_PORT=4566
+    ports:
+      - '4566-4597:4566-4597'
+    volumes:
+      - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    #   - "./scripts:/scripts"
+    # command: /bin/bash "/scripts/myscript.sh"
+    networks:
+        - localstack_network
+  
+  sns_stack:
+    image: mesosphere/aws-cli
+    container_name: sns
+    depends_on:
+      - localstack
+    environment:
+      # AWS access key and secret key without a profile
+      AWS_ACCESS_KEY_ID: AKIAEXAMPLE123
+      AWS_SECRET_ACCESS_KEY: AWSSECRETACCESSEY123
+      AWS_DEFAULT_REGION: eu-central-1
+    entrypoint: /bin/sh -c
+    command: >
+      "
+        sleep 10
+        echo ========================>testing
+        aws --endpoint-url=http://localstack:4566 sns list-topics --region eu-central-1
+        #creating topic
+        aws --endpoint-url=http://localstack:4566 sns create-topic --name order-creation-events --region eu-central-1
+        aws --endpoint-url=http://localstack:4566 sns create-topic --name order-creation-event --region eu-central-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name dummy-queue-2 --region eu-central-1
+        # Executing SNS
+        echo "======================>testing"
+      "
+    networks:
+      - localstack_network
+
+networks:
+  localstack_network:
+    driver: bridge
