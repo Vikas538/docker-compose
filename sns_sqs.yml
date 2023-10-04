@@ -1,4 +1,4 @@
-version: '3.0'
+version: "3.0"
 
 services:
   localstack:
@@ -8,20 +8,18 @@ services:
       - SERVICES=sqs,sns
       - AWS_ACCESS_KEY_ID=AKIAEXAMPLE123
       - AWS_SECRET_ACCESS_KEY=AWSSECRETACCESSEY123
-      - AWS_DEFAULT_REGION=eu-central-1
+      - AWS_DEFAULT_REGION=ap-south-1
       - EDGE_PORT=4566
     ports:
-      - '4566-4597:4566-4597'
+      - "4566-4597:4566-4597"
     volumes:
       - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
-    #   - "./scripts:/scripts"
-    # command: /bin/bash "/scripts/myscript.sh"
     networks:
-        - localstack_network
-  
+      - localstack_network
+
   sns_stack:
-    image: mesosphere/aws-cli
+    image: amazon/aws-cli
     container_name: sns
     depends_on:
       - localstack
@@ -29,19 +27,53 @@ services:
       # AWS access key and secret key without a profile
       AWS_ACCESS_KEY_ID: AKIAEXAMPLE123
       AWS_SECRET_ACCESS_KEY: AWSSECRETACCESSEY123
-      AWS_DEFAULT_REGION: eu-central-1
+      AWS_DEFAULT_REGION: ap-south-1
     entrypoint: /bin/sh -c
     command: >
       "
         sleep 10
-        echo ========================>testing
-        aws --endpoint-url=http://localstack:4566 sns list-topics --region eu-central-1
         #creating topic
-        aws --endpoint-url=http://localstack:4566 sns create-topic --name order-creation-events --region eu-central-1
-        aws --endpoint-url=http://localstack:4566 sns create-topic --name order-creation-event --region eu-central-1
-        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name dummy-queue-2 --region eu-central-1
+        aws --endpoint-url=http://localstack:4566 sns create-topic --name pharmconnect-qa-payment_updates.fifo  --attribute FifoTopic=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sns create-topic --name pharmconnect-qa-zonocloud_updates.fifo  --attribute FifoTopic=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sns create-topic --name uat-invoice_updates --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sns create-topic --name pharmconnect-qa-invoice_updates.fifo --attribute FifoTopic=true --region ap-south-1
+
+        
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-batch_master_queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-batch-master-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-cfa-master-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-cheque-worker-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-claim-worker-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-claims-sns-listener-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-commerce-sns-listener-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-company-customer-level-products-master-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-company-product-master-exclusion-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-company-users-master-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-customer-division-cfa-master-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-customer-master-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-distributor-worker-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-division-master-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-document-worker-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-employee-master-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-header-division-master-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-invoice-inbound-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-invoice-worker-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name 	pharmconnect-qa-ledger-details-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-ledger-worker-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-namepharmconnect-qa-mdm-batch_master_queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-mdm-cfa-master-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-mdm-company-customer-level-products-master-queue.fifo --attribute FifoQueue=true --region ap-south-1
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pharmconnect-qa-mdm-company-product-master-exclusion-queue.fifo --attribute FifoQueue=true --region ap-south-1
+
+
+        aws --endpoint-url=http://localstack:4566 sns subscribe  --topic-arn arn:aws:sns:ap-south-1:000000000000:pharmconnect-qa-zonocloud_updates.fifo --protocol sqs --notification-endpoint arn:aws:sns:ap-south-1:000000000000:pharmconnect-qa-claims-sns-listener-queue.fifo
+        aws --endpoint-url=http://localstack:4566 sns subscribe  --topic-arn arn:aws:sns:ap-south-1:000000000000:pharmconnect-qa-payment_updates.fifo --protocol sqs --notification-endpoint arn:aws:sns:ap-south-1:000000000000:pharmconnect-qa-claims-sns-listener-queue.fifo
+        aws --endpoint-url=http://localstack:4566 sns subscribe  --topic-arn arn:aws:sns:ap-south-1:000000000000:pharmconnect-qa-invoice_updates.fifo --protocol sqs --notification-endpoint arn:aws:sns:ap-south-1:000000000000:pharmconnect-qa-claims-sns-listener-queue.fifo
+
+        aws --endpoint-url=http://localstack:4566 sns subscribe  --topic-arn arn:aws:sns:ap-south-1:000000000000:pharmconnect-qa-zonocloud_updates.fifo --protocol sqs --notification-endpoint arn:aws:sns:ap-south-1:000000000000:pharmconnect-qa-commerce-sns-listener-queue.fifo
+        aws --endpoint-url=http://localstack:4566 sns subscribe  --topic-arn arn:aws:sns:ap-south-1:000000000000:pharmconnect-qa-payment_updates.fifo --protocol sqs --notification-endpoint arn:aws:sns:ap-south-1:000000000000:pharmconnect-qa-commerce-sns-listener-queue.fifo
+        aws --endpoint-url=http://localstack:4566 sns subscribe  --topic-arn arn:aws:sns:ap-south-1:000000000000:pharmconnect-qa-invoice_updates.fifo --protocol sqs --notification-endpoint arn:aws:sns:ap-south-1:000000000000:pharmconnect-qa-commerce-sns-listener-queue.fifo
         # Executing SNS
-        echo "======================>testing"
       "
     networks:
       - localstack_network
@@ -49,3 +81,4 @@ services:
 networks:
   localstack_network:
     driver: bridge
+172.22.0.2
